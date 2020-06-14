@@ -1,26 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using COMAdmin;
 using System.IO;
 using Microsoft.Win32;
 
 
-namespace ConsoleApp1
+namespace COM1CMR
 {
-    class Program
+    internal class Program
     {
-        class info1C
+        class Info1C
         {
-            public string comPath { get; set; }
-            public string ver { get; set; }
-            public string clsid { get; set; }
+            public string ComPath { get; set; }
+            public string Ver { get; set; }
+            public string Clsid { get; set; }
 
-            public info1C (string comPathc, string verc)
+            public Info1C (string comPathc, string verc)
             {
-                comPath = comPathc;
-                ver = verc;
+                ComPath = comPathc;
+                Ver = verc;
             }
         }
 
@@ -86,7 +85,7 @@ namespace ConsoleApp1
 
             Console.WriteLine("Каталог: " + dir1C + " найден.\n");
 
-            List <info1C> verList = new List<info1C>();
+            List <Info1C> verList = new List<Info1C>();
 
             String[] catalog1C = Directory.GetDirectories(@"C:\Program Files (x86)\1cv8", "8.*");
 
@@ -103,7 +102,7 @@ namespace ConsoleApp1
 
                 Console.WriteLine("Найдена компонента версии: " + ver);  
 
-                verList.Add(new info1C(comPath, ver));
+                verList.Add(new Info1C(comPath, ver));
             }
 
             Console.WriteLine("\n");
@@ -122,11 +121,11 @@ namespace ConsoleApp1
                 var arrayName = catalogObject.Name.ToString().Split('_');
                 var ver = arrayName[arrayName.Length - 1];
 
-                var findVer = verList.Where(s => s.ver == ver);
+                var findVer = verList.Where(s => s.Ver == ver);
 
                 if (findVer.Count() != 0)
                 {
-                    Console.WriteLine("Найдена обертка для версии: " + findVer.First().ver);
+                    Console.WriteLine("Найдена обертка для версии: " + findVer.First().Ver);
                     verList.Remove(findVer.First());
                 }
 
@@ -135,17 +134,17 @@ namespace ConsoleApp1
             if (mainConnector == null)
             {
                 Console.WriteLine("Основная обертка: V83.COMConnector НЕ найдена.");
-                catalog.InstallComponent("1cv8", verList.Last().comPath, "", "");
+                catalog.InstallComponent("1cv8", verList.Last().ComPath, "", "");
                 Console.WriteLine("Основная обертка: V83.COMConnector создана");
                 mainConnector = findMainCom(comCollections);
             }
 
-            foreach (info1C itemVer in verList)
+            foreach (Info1C itemVer in verList)
             {
                 Console.WriteLine("\n");
-                Console.WriteLine("Создание обертки для версии: " + itemVer.ver);
-                catalog.AliasComponent("1cv8", mainConnector.get_Value("CLSID").ToString(), "", "V83.COMConnector_" + itemVer.ver, "");
-                Console.WriteLine("Обертка для версии: " + itemVer.ver + " создана.");
+                Console.WriteLine("Создание обертки для версии: " + itemVer.Ver);
+                catalog.AliasComponent("1cv8", mainConnector.get_Value("CLSID").ToString(), "", "V83.COMConnector_" + itemVer.Ver, "");
+                Console.WriteLine("Обертка для версии: " + itemVer.Ver + " создана.");
             }
 
             comCollections.Populate();
@@ -161,11 +160,11 @@ namespace ConsoleApp1
                 }
 
                 var arrayName = catalogObject.Name.ToString().Split('_');
-                info1C findingItem = null;
+                Info1C findingItem = null;
 
                 try
                 {
-                    findingItem = verList.First(s => s.ver == arrayName[arrayName.Length - 1]);
+                    findingItem = verList.First(s => s.Ver == arrayName[arrayName.Length - 1]);
                 }
                 catch { continue; }
 
@@ -177,13 +176,13 @@ namespace ConsoleApp1
                 string clsid = catalogObject.get_Value("CLSID").ToString();
 
                 Console.WriteLine("\n");
-                Console.WriteLine("Начато изменение данных в реестре, для версии: " + findingItem.ver);
+                Console.WriteLine("Начато изменение данных в реестре, для версии: " + findingItem.Ver);
 
                 RegistryKey readKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Classes\\Wow6432Node\\CLSID\\" + clsid + "\\InprocServer32", true);
-                readKey.SetValue("", findingItem.comPath);
+                readKey.SetValue("", findingItem.ComPath);
                 readKey.Close();
 
-                Console.WriteLine("Произведено изменение данных в реестре, для версии: " + findingItem.ver);
+                Console.WriteLine("Произведено изменение данных в реестре, для версии: " + findingItem.Ver);
 
             }
 
